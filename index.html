@@ -12,6 +12,46 @@
 <body>
     <div id="toast-container"></div>
 
+    <!-- Header de Navegação -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-brand">
+                <img src="assets/images/icons8-ai-48.png" alt="AI Composer" class="header-logo">
+                <h1 class="header-title">AI Composer</h1>
+            </div>
+            
+            <nav class="header-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#personalidades" class="nav-link active" data-section="personalidades">
+                            <span class="nav-icon">🎭</span>
+                            <span class="nav-text">Personalidades</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#gerador" class="nav-link" data-section="gerador">
+                            <span class="nav-icon">⚡</span>
+                            <span class="nav-text">Gerador</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#sobre" class="nav-link" data-section="sobre">
+                            <span class="nav-icon">ℹ️</span>
+                            <span class="nav-text">Sobre</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <span class="menu-icon"></span>
+                <span class="menu-icon"></span>
+                <span class="menu-icon"></span>
+            </button>
+        </div>
+        <div class="scroll-progress"></div>
+    </header>
+
     <!-- Modal de Confirmação -->
     <div id="confirmation-modal" class="confirmation-modal">
         <div class="modal-content">
@@ -32,28 +72,21 @@
     <div class="container">
         <section class="hero-section">
             <div class="hero-background">
-                <img src="assets/images/prompt.jpg" alt="Ilustração abstrata de um cérebro de IA" class="header-image">
+                <img src="assets/images/ai-composer.jpg" alt="Ilustração abstrata de um cérebro de IA" class="header-image">
                 <div class="hero-overlay">
                     <div class="hero-content">
                         <h1 class="hero-title">AI Composer</h1>
                         <div class="hero-intro">
-                            Para extrair o máximo de poder dos prompts complexos, use o Google Gemini. Sua janela de contexto de até 2 milhões de tokens permite que as personalidades mantenham a consistência e sigam as instruções do sistema sem perda de informação, mesmo em conversas muito longas.
+                            O vazamento do Claude revelou que 90% do prompt era dedicado a definir <strong>comportamentos específicos</strong>, não apenas instruções gerais. Incluía exemplos de diálogos, regras de tom, e até mesmo respostas para cenários específicos. Essa abordagem transforma a IA em um <strong>personagem consistente</strong> que mantém sua personalidade durante toda a conversa, criando uma experiência muito mais natural e envolvente.
                         </div>
                     </div>
                 </div>
             </div>
         </section>
         
-        <section class="info-section">
-            <div class="info-content">
-                <h2 class="info-title">O Segredo dos Prompts de Sistema</h2>
-                <p class="info-text">O vazamento do Claude revelou que 90% do prompt era dedicado a definir <strong>comportamentos específicos</strong>, não apenas instruções gerais. Incluía exemplos de diálogos, regras de tom, e até mesmo respostas para cenários específicos. Essa abordagem transforma a IA em um <strong>personagem consistente</strong> que mantém sua personalidade durante toda a conversa, criando uma experiência muito mais natural e envolvente.</p>
-            </div>
-        </section>
-
         <div class="section-divider"><span>1. Escolha a Personalidade Base</span></div>
 
-        <main class="prompts-grid" id="prompts-grid">
+        <main class="prompts-grid" id="personalidades">
             <div id="create-new-card" class="prompt-card">
                 <h3>+ Criar Nova Personalidade</h3>
                 <div class="create-actions">
@@ -64,21 +97,23 @@
             </div>
         </main>
 
-        <section class="generator-container">
+        <section class="generator-container" id="gerador">
             <h2>Compositor Principal</h2>
             <label for="user-command-input" class="input-label">2. Digite seu comando ou pergunta aqui...</label>
             <textarea id="user-command-input" placeholder="Ex: Crie uma rotina de estudos de 3 dias para aprender sobre Redux..."></textarea>
             <button id="generate-btn">3. Gerar e Copiar o Prompt Final</button>
         </section>
 
-        <section class="recommendation-section">
-            <h3>Otimizado para o Gemini</h3>
-            <p>
-                Para extrair o máximo de poder dos prompts complexos, use o Google Gemini. Sua janela de contexto de até 2 milhões de tokens permite que as personalidades mantenham a consistência e sigam as instruções do sistema sem perda de informação, mesmo em conversas muito longas.
-            </p>
-            <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer" class="cta-button">
-                Testar no Gemini
-            </a>
+        <section class="gemini-section" id="sobre">
+            <div class="gemini-content">
+                <h2>Otimizado para o Gemini</h2>
+                <p>
+                    Para extrair o máximo de poder dos prompts complexos, use o Google Gemini. Sua janela de contexto de até 2 milhões de tokens permite que as personalidades mantenham a consistência e sigam as instruções do sistema sem perda de informação, mesmo em conversas muito longas.
+                </p>
+                <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer" class="gemini-cta-button">
+                    🚀 Testar no Gemini
+                </a>
+            </div>
         </section>
     </div>
 

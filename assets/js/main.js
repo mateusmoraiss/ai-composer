@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- ELEMENTOS DO DOM ---
-    const promptsGrid = document.getElementById('prompts-grid');
+    const promptsGrid = document.getElementById('personalidades');
     const createCardBtn = document.getElementById('create-new-card');
     const createPersonalityBtn = document.getElementById('create-personality-btn');
     const importPersonalityBtn = document.getElementById('import-personality-btn');
@@ -9,6 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const userCommandInput = document.getElementById('user-command-input');
     const toastContainer = document.getElementById('toast-container');
     
+    // --- ELEMENTOS DO HEADER ---
+    const mainHeader = document.querySelector('.main-header');
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const navList = document.querySelector('.nav-list');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const headerBrand = document.querySelector('.header-brand');
+    const scrollProgress = document.querySelector('.scroll-progress');
+    
     // --- ELEMENTOS DO MODAL ---
     const confirmationModal = document.getElementById('confirmation-modal');
     const modalTitle = document.getElementById('modal-title');
@@ -16,6 +24,109 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalClose = document.getElementById('modal-close');
     const modalCancel = document.getElementById('modal-cancel');
     const modalConfirm = document.getElementById('modal-confirm');
+
+    // --- FUNCIONALIDADE DO HEADER ---
+    
+    // Scroll effect no header
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            mainHeader.classList.add('scrolled');
+        } else {
+            mainHeader.classList.remove('scrolled');
+        }
+        
+        // Atualiza indicador de progresso
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = (scrollTop / docHeight) * 100;
+        scrollProgress.style.width = scrollPercent + '%';
+    });
+    
+    // Menu mobile
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileMenuBtn.classList.toggle('active');
+        navList.classList.toggle('active');
+    });
+    
+    // Navegação suave
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Remove active de todos os links
+            navLinks.forEach(l => l.classList.remove('active'));
+            
+            // Adiciona active ao link clicado
+            link.classList.add('active');
+            
+            // Fecha menu mobile se estiver aberto
+            mobileMenuBtn.classList.remove('active');
+            navList.classList.remove('active');
+            
+            // Scroll suave para a seção
+            const targetId = link.getAttribute('href').substring(1);
+            const targetSection = document.getElementById(targetId);
+            
+            if (targetSection) {
+                const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height'));
+                const targetPosition = targetSection.offsetTop - headerHeight - 20;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+    
+    // Clique no brand para ir ao topo
+    headerBrand.addEventListener('click', () => {
+        // Remove active de todos os links
+        navLinks.forEach(l => l.classList.remove('active'));
+        
+        // Adiciona active ao primeiro link (Personalidades)
+        navLinks[0].classList.add('active');
+        
+        // Scroll suave para o topo
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Atualiza navegação ativa baseado no scroll
+    function updateActiveNavigation() {
+        const sections = ['personalidades', 'gerador'];
+        const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height'));
+        
+        let currentSection = '';
+        
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const sectionTop = section.offsetTop - headerHeight - 100;
+                const sectionBottom = sectionTop + section.offsetHeight;
+                
+                if (window.scrollY >= sectionTop && window.scrollY < sectionBottom) {
+                    currentSection = sectionId;
+                }
+            }
+        });
+        
+        // Atualiza o link ativo
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${currentSection}`) {
+                link.classList.add('active');
+            }
+        });
+    }
+    
+    // Atualiza navegação no scroll
+    window.addEventListener('scroll', updateActiveNavigation);
+    
+    // Atualiza navegação na carga inicial
+    updateActiveNavigation();
 
     // --- DADOS PADRÃO ---
     const defaultPrompts = {
