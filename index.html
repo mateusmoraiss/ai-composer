@@ -12,6 +12,23 @@
 <body>
     <div id="toast-container"></div>
 
+    <!-- Modal de Confirmação -->
+    <div id="confirmation-modal" class="confirmation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Confirmação</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message">Tem certeza que deseja realizar esta ação?</p>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" id="modal-cancel">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" id="modal-confirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <section class="hero-section">
             <div class="hero-background">
@@ -39,6 +56,11 @@
         <main class="prompts-grid" id="prompts-grid">
             <div id="create-new-card" class="prompt-card">
                 <h3>+ Criar Nova Personalidade</h3>
+                <div class="create-actions">
+                    <button class="create-btn" id="create-personality-btn">✨ Criar Nova</button>
+                    <button class="create-btn import-btn" id="import-personality-btn">📥 Importar</button>
+                    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+                </div>
             </div>
         </main>
 

@@ -665,36 +665,123 @@ body {
     flex-wrap: wrap; 
 }
 
-.prompt-actions button { 
-    flex-grow: 1; 
-    background: rgba(99, 102, 241, 0.1);
-    color: var(--text-color); 
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    padding: 0.75rem 1rem; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-family: var(--font-family); 
-    font-size: 0.9rem; 
+.prompt-actions button {
+    background: var(--secondary-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
     font-weight: 500;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .prompt-actions button:hover {
-    background: rgba(99, 102, 241, 0.2);
-    border-color: var(--primary-color);
-    transform: translateY(-1px);
+    background: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .prompt-actions .delete-btn { 
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
+    background: var(--danger-color);
+    color: white;
 }
 
 .prompt-actions .delete-btn:hover {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: var(--danger-color);
+    background: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.prompt-actions .duplicate-btn {
+    background: var(--success-color);
+    color: white;
+}
+
+.prompt-actions .duplicate-btn:hover {
+    background: #059669;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.prompt-actions .export-btn {
+    background: #8b5cf6;
+    color: white;
+}
+
+.prompt-actions .export-btn:hover {
+    background: #7c3aed;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+/* Melhorias para botões com emojis */
+.prompt-actions button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 120px;
+    justify-content: center;
+}
+
+/* Tooltip personalizado */
+.prompt-actions button[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 0.5rem;
+    animation: tooltipFadeIn 0.2s ease-out;
+}
+
+.prompt-actions button[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    margin-bottom: -0.5rem;
+    z-index: 1000;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Responsividade para botões */
+@media (max-width: 768px) {
+    .prompt-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .prompt-actions button {
+        width: 100%;
+        min-width: auto;
+        justify-content: center;
+    }
+    
+    .prompt-actions button[title]:hover::after {
+        display: none; /* Desabilita tooltips em mobile */
+    }
 }
 
 .prompt-content { 
@@ -730,64 +817,116 @@ body {
 }
 
 #create-new-card { 
-    border: 2px dashed rgba(99, 102, 241, 0.4);
-    justify-content: center; 
-    align-items: center; 
-    cursor: pointer; 
-    min-height: 250px; 
-    text-align: center; 
-    font-size: 1.3rem;
-    background: rgba(99, 102, 241, 0.05);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    border: 2px dashed rgba(99, 102, 241, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
     animation: createCardPulse 2s ease-in-out infinite;
 }
 
 @keyframes createCardPulse {
-    0%, 100% { 
-        border-color: rgba(99, 102, 241, 0.4);
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
-    }
-    50% { 
-        border-color: rgba(99, 102, 241, 0.8);
-        box-shadow: 0 0 0 10px rgba(99, 102, 241, 0.1);
-    }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
 }
 
 #create-new-card::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 60px;
-    height: 60px;
-    background: var(--gradient-primary);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0.1;
-    animation: createIconFloat 3s ease-in-out infinite;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+    animation: createIconFloat 3s infinite;
 }
 
 @keyframes createIconFloat {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.1); }
+    0% { left: -100%; }
+    100% { left: 100%; }
 }
 
 #create-new-card:hover { 
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
     border-color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.15);
-    color: var(--primary-color);
-    transform: translateY(-8px) scale(1.02);
-    animation: none;
-    box-shadow: 
-        0 25px 50px rgba(99, 102, 241, 0.2),
-        0 0 0 1px rgba(99, 102, 241, 0.3);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
 }
 
 #create-new-card:hover::before {
-    opacity: 0.2;
-    animation: createIconFloat 1s ease-in-out infinite;
+    animation-duration: 1s;
+}
+
+.create-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.create-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.create-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.create-btn:hover::before {
+    left: 100%;
+}
+
+.create-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.create-btn.import-btn {
+    background: var(--success-color);
+}
+
+.create-btn.import-btn:hover {
+    background: #059669;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+@media (max-width: 768px) {
+    .create-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .create-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .info-section {
@@ -1084,5 +1223,241 @@ footer p .code-symbol {
 }
 
 footer p:hover .code-symbol {
-    text-shadow: 0 0 8px var(--primary-color);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Modal de Confirmação */
+.confirmation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.confirmation-modal.show {
+    display: flex;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: var(--card-color);
+    border-radius: 20px;
+    padding: 0;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-color);
+    position: relative;
+    animation: modalSlideIn 0.3s ease-out;
+    overflow: hidden;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-header {
+    background: var(--gradient-primary);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 2rem;
+    text-align: center;
+}
+
+.modal-body p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text-color);
+}
+
+.modal-actions {
+    padding: 0 2rem 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.modal-btn {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    min-width: 120px;
+}
+
+.modal-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.modal-btn:hover::before {
+    left: 100%;
+}
+
+.modal-btn-cancel {
+    background: var(--secondary-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.modal-btn-cancel:hover {
+    background: #4b5563;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.modal-btn-confirm {
+    background: var(--danger-color);
+    color: white;
+    border: 1px solid var(--danger-color);
+}
+
+.modal-btn-confirm:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Responsividade do Modal */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .modal-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.3rem;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-body p {
+        font-size: 1rem;
+    }
+    
+    .modal-actions {
+        padding: 0 1.5rem 1.5rem;
+        flex-direction: column;
+    }
+    
+    .modal-btn {
+        width: 100%;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 98%;
+        margin: 0.5rem;
+    }
+    
+    .modal-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-actions {
+        padding: 0 1rem 1rem;
+    }
 }

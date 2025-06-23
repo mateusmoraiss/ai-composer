@@ -2,9 +2,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ELEMENTOS DO DOM ---
     const promptsGrid = document.getElementById('prompts-grid');
     const createCardBtn = document.getElementById('create-new-card');
+    const createPersonalityBtn = document.getElementById('create-personality-btn');
+    const importPersonalityBtn = document.getElementById('import-personality-btn');
+    const importFileInput = document.getElementById('import-file-input');
     const generateBtn = document.getElementById('generate-btn');
     const userCommandInput = document.getElementById('user-command-input');
     const toastContainer = document.getElementById('toast-container');
+    
+    // --- ELEMENTOS DO MODAL ---
+    const confirmationModal = document.getElementById('confirmation-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMessage = document.getElementById('modal-message');
+    const modalClose = document.getElementById('modal-close');
+    const modalCancel = document.getElementById('modal-cancel');
+    const modalConfirm = document.getElementById('modal-confirm');
 
     // --- DADOS PADRÃO ---
     const defaultPrompts = {
@@ -280,6 +291,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    // Função de confirmação personalizada
+    function showConfirmation(title, message, onConfirm, onCancel = null) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        confirmationModal.classList.add('show');
+        
+        // Foca no botão de cancelar por segurança
+        modalCancel.focus();
+        
+        const handleConfirm = () => {
+            confirmationModal.classList.remove('show');
+            cleanup();
+            if (onConfirm) onConfirm();
+        };
+        
+        const handleCancel = () => {
+            confirmationModal.classList.remove('show');
+            cleanup();
+            if (onCancel) onCancel();
+        };
+        
+        const handleClose = () => {
+            confirmationModal.classList.remove('show');
+            cleanup();
+        };
+        
+        const cleanup = () => {
+            modalConfirm.removeEventListener('click', handleConfirm);
+            modalCancel.removeEventListener('click', handleCancel);
+            modalClose.removeEventListener('click', handleClose);
+            confirmationModal.removeEventListener('click', handleBackgroundClick);
+            document.removeEventListener('keydown', handleKeydown);
+        };
+        
+        const handleBackgroundClick = (e) => {
+            if (e.target === confirmationModal) {
+                handleCancel();
+            }
+        };
+        
+        const handleKeydown = (e) => {
+            if (e.key === 'Escape') {
+                handleCancel();
+            } else if (e.key === 'Enter') {
+                handleConfirm();
+            }
+        };
+        
+        modalConfirm.addEventListener('click', handleConfirm);
+        modalCancel.addEventListener('click', handleCancel);
+        modalClose.addEventListener('click', handleClose);
+        confirmationModal.addEventListener('click', handleBackgroundClick);
+        document.addEventListener('keydown', handleKeydown);
+    }
+
     function createPromptCard(id, name, content, isCustom = false) {
         const card = document.createElement('div');
         card.className = 'prompt-card';
@@ -294,17 +360,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 <label>
                     <input type="radio" name="prompt-choice" value="${id}">
                     <span class="prompt-name" contenteditable="false" spellcheck="false">${name}</span>
-                    <button class="edit-name-btn">✏️</button> 
+                    <button class="edit-name-btn" title="Editar nome">✏️</button> 
                     ${id === 'maestro-cognitivo' ? '<span class="plus-badge">PLUS</span>' : ''}
                 </label>
             </h3>
             <div class="prompt-actions">
-                <button class="action-btn view-btn">Ver Detalhes</button>
-                <button class="action-btn copy-btn">Copiar Base</button>
-                <button class="action-btn edit-btn">Editar Corpo</button>
-                ${isCustom ? '<button class="action-btn delete-btn">Deletar</button>' : '<button class="action-btn reset-btn">Resetar</button>'}
+                <button class="action-btn view-btn" title="Ver/ocultar detalhes">👁️ Ver Detalhes</button>
+                <button class="action-btn copy-btn" title="Copiar prompt base">📋 Copiar Base</button>
+                <button class="action-btn edit-btn" title="Editar conteúdo">✏️ Editar Corpo</button>
+                <button class="action-btn duplicate-btn" title="Duplicar personalidade">📋 Duplicar</button>
+                <button class="action-btn export-btn" title="Exportar personalidade">📤 Exportar</button>
+                ${isCustom ? 
+                    '<button class="action-btn delete-btn" title="Deletar personalidade">🗑️ Deletar</button>' : 
+                    '<button class="action-btn reset-btn" title="Resetar para padrão">🔄 Resetar</button>'
+                }
             </div>
-            <textarea class="prompt-content" readonly>${content}</textarea>
+            <textarea class="prompt-content" readonly placeholder="Conteúdo do prompt...">${content}</textarea>
         `;
         promptsGrid.insertBefore(card, createCardBtn);
     }
@@ -358,47 +429,127 @@ document.addEventListener('DOMContentLoaded', () => {
         if (button) {
             const promptId = card.dataset.promptId;
             const contentArea = card.querySelector('.prompt-content');
+            const promptName = card.querySelector('.prompt-name').textContent;
 
             if (button.classList.contains('view-btn')) {
                 const isVisible = contentArea.style.display === 'block';
                 contentArea.style.display = isVisible ? 'none' : 'block';
-                button.textContent = isVisible ? "Ver Detalhes" : "Ocultar Detalhes";
+                button.textContent = isVisible ? "👁️ Ver Detalhes" : "👁️ Ocultar Detalhes";
             }
+            
             if (button.classList.contains('copy-btn')) {
                 navigator.clipboard.writeText(contentArea.value);
-                showToast('Prompt base copiado!', 'success');
+                showToast('Prompt base copiado para a área de transferência!', 'success');
             }
+            
+            if (button.classList.contains('duplicate-btn')) {
+                showConfirmation(
+                    'Duplicar Personalidade',
+                    `Deseja criar uma cópia da personalidade "${promptName}"? A cópia será salva como uma nova personalidade personalizada.`,
+                    () => {
+                        const newId = `custom_${Date.now()}`;
+                        const newName = `${promptName} (Cópia)`;
+                        const newContent = contentArea.value;
+                        
+                        createPromptCard(newId, newName, newContent, true);
+                        
+                        let customIds = JSON.parse(localStorage.getItem('customPromptIds') || '[]');
+                        customIds.push(newId);
+                        localStorage.setItem('customPromptIds', JSON.stringify(customIds));
+                        localStorage.setItem(`name_${newId}`, newName);
+                        localStorage.setItem(`prompt_${newId}`, newContent);
+                        
+                        // Seleciona automaticamente o novo card
+                        const newCard = document.querySelector(`[data-prompt-id="${newId}"]`);
+                        if (newCard) {
+                            document.querySelectorAll('.prompt-card').forEach(c => c.classList.remove('selected-card'));
+                            newCard.classList.add('selected-card');
+                            newCard.querySelector('input[type="radio"]').checked = true;
+                        }
+                        
+                        showToast('Personalidade duplicada com sucesso!', 'success');
+                    }
+                );
+            }
+            
+            if (button.classList.contains('export-btn')) {
+                const exportData = {
+                    name: promptName,
+                    content: contentArea.value,
+                    exportedAt: new Date().toISOString(),
+                    version: '1.0'
+                };
+                
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${promptName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast('Personalidade exportada com sucesso!', 'success');
+            }
+            
             if (button.classList.contains('edit-btn')) {
-                 contentArea.readOnly = !contentArea.readOnly;
-                 if(!contentArea.readOnly) {
+                if (contentArea.readOnly) {
+                    // Entrando no modo de edição
+                    contentArea.readOnly = false;
                     contentArea.style.display = 'block';
                     contentArea.focus();
-                    showToast('Modo de edição ativado.');
-                 } else {
-                    localStorage.setItem(`prompt_${promptId}`, contentArea.value);
-                    showToast('Corpo do prompt salvo!', 'success');
-                 }
-                 button.textContent = contentArea.readOnly ? "Editar Corpo" : "Salvar Corpo";
-            }
-            if (button.classList.contains('reset-btn')) {
-                const defaultName = defaultPrompts[promptId].name;
-                const defaultContent = defaultPrompts[promptId].content;
-                card.querySelector('.prompt-name').textContent = defaultName;
-                contentArea.value = defaultContent;
-                localStorage.setItem(`name_${promptId}`, defaultName);
-                localStorage.setItem(`prompt_${promptId}`, defaultContent);
-                showToast('Prompt resetado para o padrão.', 'success');
-            }
-            if (button.classList.contains('delete-btn')) {
-                if (confirm(`Tem certeza que deseja deletar a personalidade "${card.querySelector('.prompt-name').textContent}"?`)) {
-                    let customIds = JSON.parse(localStorage.getItem('customPromptIds') || '[]');
-                    customIds = customIds.filter(id => id !== promptId);
-                    localStorage.setItem('customPromptIds', JSON.stringify(customIds));
-                    localStorage.removeItem(`name_${promptId}`);
-                    localStorage.removeItem(`prompt_${promptId}`);
-                    card.remove();
-                    showToast('Personalidade deletada.', 'success');
+                    button.textContent = "💾 Salvar Corpo";
+                    showToast('Modo de edição ativado. Clique em "Salvar Corpo" quando terminar.', 'success');
+                } else {
+                    // Salvando as alterações
+                    showConfirmation(
+                        'Salvar Alterações',
+                        `Tem certeza que deseja salvar as alterações na personalidade "${promptName}"?`,
+                        () => {
+                            localStorage.setItem(`prompt_${promptId}`, contentArea.value);
+                            contentArea.readOnly = true;
+                            button.textContent = "✏️ Editar Corpo";
+                            showToast('Corpo do prompt salvo com sucesso!', 'success');
+                        },
+                        () => {
+                            // Se cancelar, volta para o modo de edição
+                            contentArea.focus();
+                        }
+                    );
                 }
+            }
+            
+            if (button.classList.contains('reset-btn')) {
+                showConfirmation(
+                    'Resetar Personalidade',
+                    `Tem certeza que deseja resetar a personalidade "${promptName}" para o padrão original? Esta ação não pode ser desfeita.`,
+                    () => {
+                        const defaultName = defaultPrompts[promptId].name;
+                        const defaultContent = defaultPrompts[promptId].content;
+                        card.querySelector('.prompt-name').textContent = defaultName;
+                        contentArea.value = defaultContent;
+                        localStorage.setItem(`name_${promptId}`, defaultName);
+                        localStorage.setItem(`prompt_${promptId}`, defaultContent);
+                        showToast('Personalidade resetada para o padrão original.', 'success');
+                    }
+                );
+            }
+            
+            if (button.classList.contains('delete-btn')) {
+                showConfirmation(
+                    'Deletar Personalidade',
+                    `Tem certeza que deseja deletar permanentemente a personalidade "${promptName}"? Esta ação não pode ser desfeita.`,
+                    () => {
+                        let customIds = JSON.parse(localStorage.getItem('customPromptIds') || '[]');
+                        customIds = customIds.filter(id => id !== promptId);
+                        localStorage.setItem('customPromptIds', JSON.stringify(customIds));
+                        localStorage.removeItem(`name_${promptId}`);
+                        localStorage.removeItem(`prompt_${promptId}`);
+                        card.remove();
+                        showToast('Personalidade deletada permanentemente.', 'success');
+                    }
+                );
             }
         }
     });
@@ -413,8 +564,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (newName && originalName !== newName) {
                 const promptId = promptNameSpan.closest('.prompt-card').dataset.promptId;
-                localStorage.setItem(`name_${promptId}`, newName);
-                showToast('Nome salvo!', 'success');
+                
+                // Se a mudança for significativa (mais de 3 caracteres), pede confirmação
+                if (Math.abs(newName.length - originalName.length) > 3) {
+                    showConfirmation(
+                        'Confirmar Mudança de Nome',
+                        `Tem certeza que deseja alterar o nome de "${originalName}" para "${newName}"?`,
+                        () => {
+                            localStorage.setItem(`name_${promptId}`, newName);
+                            showToast('Nome da personalidade alterado com sucesso!', 'success');
+                        },
+                        () => {
+                            // Reverte para o nome original se cancelar
+                            promptNameSpan.textContent = originalName;
+                        }
+                    );
+                } else {
+                    // Mudanças pequenas são salvas automaticamente
+                    localStorage.setItem(`name_${promptId}`, newName);
+                    showToast('Nome da personalidade atualizado!', 'success');
+                }
             } else {
                 // Se o nome for vazio ou não mudou, reverte para o original
                 promptNameSpan.textContent = originalName;
@@ -437,37 +606,137 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     createCardBtn.addEventListener('click', () => {
-        const newId = `custom_${Date.now()}`;
-        const newName = "Nova Personalidade (Edite)";
-        const newContent = "Escreva as instruções da sua nova personalidade aqui.";
-        createPromptCard(newId, newName, newContent, true);
+        showConfirmation(
+            'Criar Nova Personalidade',
+            'Deseja criar uma nova personalidade personalizada? Você poderá editar o nome e o conteúdo depois.',
+            () => {
+                const newId = `custom_${Date.now()}`;
+                const newName = "Nova Personalidade (Edite)";
+                const newContent = "Escreva as instruções da sua nova personalidade aqui.\n\n<instruções>\n<positive prompts>\n* Adicione aqui as instruções positivas da sua personalidade *\n</positive prompts>\n<negative prompts>\n* Adicione aqui as instruções negativas da sua personalidade *\n</negative prompts>\n</instruções>";
+                createPromptCard(newId, newName, newContent, true);
+                
+                let customIds = JSON.parse(localStorage.getItem('customPromptIds') || '[]');
+                customIds.push(newId);
+                localStorage.setItem('customPromptIds', JSON.stringify(customIds));
+                localStorage.setItem(`name_${newId}`, newName);
+                localStorage.setItem(`prompt_${newId}`, newContent);
+                
+                // Seleciona automaticamente o novo card
+                const newCard = document.querySelector(`[data-prompt-id="${newId}"]`);
+                if (newCard) {
+                    document.querySelectorAll('.prompt-card').forEach(c => c.classList.remove('selected-card'));
+                    newCard.classList.add('selected-card');
+                    newCard.querySelector('input[type="radio"]').checked = true;
+                }
+                
+                showToast('Nova personalidade criada! Clique no ícone de edição para personalizar.', 'success');
+            }
+        );
+    });
+
+    // Event listener para o botão de criar personalidade
+    createPersonalityBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Evita que o evento do card seja disparado
+        createCardBtn.click(); // Reutiliza a lógica existente
+    });
+
+    // Event listener para o botão de importar personalidade
+    importPersonalityBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Evita que o evento do card seja disparado
+        importFileInput.click();
+    });
+
+    // Event listener para o input de arquivo
+    importFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const importData = JSON.parse(event.target.result);
+                
+                if (!importData.name || !importData.content) {
+                    showToast('Arquivo inválido. Verifique se é um arquivo de personalidade válido.', 'error');
+                    return;
+                }
+
+                showConfirmation(
+                    'Importar Personalidade',
+                    `Deseja importar a personalidade "${importData.name}"?`,
+                    () => {
+                        const newId = `custom_${Date.now()}`;
+                        const newName = importData.name;
+                        const newContent = importData.content;
+                        
+                        createPromptCard(newId, newName, newContent, true);
+                        
+                        let customIds = JSON.parse(localStorage.getItem('customPromptIds') || '[]');
+                        customIds.push(newId);
+                        localStorage.setItem('customPromptIds', JSON.stringify(customIds));
+                        localStorage.setItem(`name_${newId}`, newName);
+                        localStorage.setItem(`prompt_${newId}`, newContent);
+                        
+                        // Seleciona automaticamente o novo card
+                        const newCard = document.querySelector(`[data-prompt-id="${newId}"]`);
+                        if (newCard) {
+                            document.querySelectorAll('.prompt-card').forEach(c => c.classList.remove('selected-card'));
+                            newCard.classList.add('selected-card');
+                            newCard.querySelector('input[type="radio"]').checked = true;
+                        }
+                        
+                        showToast('Personalidade importada com sucesso!', 'success');
+                    }
+                );
+            } catch (error) {
+                showToast('Erro ao ler o arquivo. Verifique se é um arquivo JSON válido.', 'error');
+            }
+        };
         
-        let customIds = JSON.parse(localStorage.getItem('customPromptIds') || '[]');
-        customIds.push(newId);
-        localStorage.setItem('customPromptIds', JSON.stringify(customIds));
-        localStorage.setItem(`name_${newId}`, newName);
-        localStorage.setItem(`prompt_${newId}`, newContent);
-        showToast('Novo card de personalidade criado!', 'success');
+        reader.readAsText(file);
+        e.target.value = ''; // Limpa o input para permitir importar o mesmo arquivo novamente
     });
 
     generateBtn.addEventListener('click', () => {
         const selectedRadio = document.querySelector('input[name="prompt-choice"]:checked');
         const userCommand = userCommandInput.value.trim();
+        
         if (!selectedRadio) {
-            showToast('Erro: Por favor, escolha uma Personalidade (Passo 1).', 'error');
+            showConfirmation(
+                'Nenhuma Personalidade Selecionada',
+                'Você precisa selecionar uma personalidade antes de gerar o prompt. Deseja selecionar a personalidade padrão "Maestro Cognitivo"?',
+                () => {
+                    const maestroCard = document.querySelector('[data-prompt-id="maestro-cognitivo"]');
+                    if (maestroCard) {
+                        document.querySelectorAll('.prompt-card').forEach(c => c.classList.remove('selected-card'));
+                        maestroCard.classList.add('selected-card');
+                        maestroCard.querySelector('input[type="radio"]').checked = true;
+                        showToast('Personalidade "Maestro Cognitivo" selecionada automaticamente!', 'success');
+                        // Tenta gerar novamente
+                        setTimeout(() => generateBtn.click(), 500);
+                    }
+                },
+                () => {
+                    showToast('Por favor, selecione uma personalidade antes de continuar.', 'error');
+                }
+            );
             return;
         }
+        
         if (!userCommand) {
             showToast('Erro: Por favor, escreva seu comando (Passo 2).', 'error');
             userCommandInput.focus();
             return;
         }
+        
         const promptId = selectedRadio.value;
         const basePrompt = document.querySelector(`.prompt-card[data-prompt-id="${promptId}"] .prompt-content`).value;
         const finalPrompt = `${basePrompt}\n\n<comando_do_usuario>\n${userCommand}\n</comando_do_usuario>`;
         
         navigator.clipboard.writeText(finalPrompt).then(() => {
-             showToast('Prompt Final gerado e copiado!', 'success');
+            showToast('Prompt Final gerado e copiado para a área de transferência!', 'success');
+        }).catch(() => {
+            showToast('Erro ao copiar para a área de transferência. Tente novamente.', 'error');
         });
     });
 
